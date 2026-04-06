@@ -2,20 +2,40 @@
 
 A simple web app to find restaurants in any city using the Yelp API.
 
-## Setup
+## Getting Started
 
-```bash
-npm install
-cp .env.example .env   # then add your Yelp API key
-npm start               # opens at http://localhost:3000
-```
+1. Clone the repo
+   ```bash
+   git clone <repo-url>
+   cd yelp-restaurant-finder
+   ```
+2. Install dependencies
+   ```bash
+   npm install
+   ```
+3. Add your Yelp API key
+   ```bash
+   cp .env.example .env
+   ```
+   Open `.env` and replace `your_yelp_api_key_here` with your actual key from [Yelp Developers](https://www.yelp.com/developers/v3/manage_app).
 
-## Tests
+4. Start the server
+   ```bash
+   npm start
+   ```
+5. Open http://localhost:3000
 
-```bash
-npx playwright install chromium   # first time only
-npm test                          # runs 18 e2e tests (server starts automatically)
-```
+## Running Tests
+
+1. Install Playwright (first time only)
+   ```bash
+   npx playwright install chromium
+   ```
+2. Run the tests
+   ```bash
+   npm test
+   ```
+   This runs 18 end-to-end tests. The server starts automatically — no need to run `npm start` separately.
 
 ## Approach
 
