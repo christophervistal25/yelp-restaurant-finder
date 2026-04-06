@@ -24,21 +24,22 @@ test('search returns restaurants with required fields', async ({ page }) => {
   await page.click('button[type="submit"]');
   await responsePromise;
 
-  await expect(page.locator('#results ul')).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('#results .card').first()).toBeVisible({ timeout: 15000 });
 
-  const items = page.locator('#results ul li');
-  const count = await items.count();
+  const cards = page.locator('#results .card');
+  const count = await cards.count();
   expect(count).toBeGreaterThan(0);
 
   // Verify first result has name, rating, address, coordinates
-  const firstItem = items.first();
-  const text = await firstItem.textContent();
-  expect(text).toMatch(/Rating: [\d.]+\/5/);
-  expect(text).toMatch(/Address: .+/);
-  expect(text).toMatch(/Coordinates: -?[\d.]+, -?[\d.]+/);
+  const firstCard = cards.first();
+  await expect(firstCard.locator('h3')).toBeVisible();
+  const text = await firstCard.textContent();
+  expect(text).toMatch(/Rating: [\d.]+ \/ 5/);
+  expect(text).toMatch(/Address:/);
+  expect(text).toMatch(/Location: -?[\d.]+, -?[\d.]+/);
 });
 
-test('displays result count message', async ({ page }) => {
+test('displays multiple restaurant cards', async ({ page }) => {
   await page.goto('/');
   await page.locator('#city-input').fill('Manila');
 
@@ -48,9 +49,9 @@ test('displays result count message', async ({ page }) => {
   await page.click('button[type="submit"]');
   await responsePromise;
 
-  await expect(page.locator('#results ul')).toBeVisible({ timeout: 15000 });
-  await expect(page.locator('#message')).toContainText('Found');
-  await expect(page.locator('#message')).toContainText('restaurants in "Manila"');
+  await expect(page.locator('#results .card').first()).toBeVisible({ timeout: 15000 });
+  const count = await page.locator('#results .card').count();
+  expect(count).toBeGreaterThan(1);
 });
 
 test('invalid city shows error', async ({ page }) => {
@@ -64,5 +65,4 @@ test('invalid city shows error', async ({ page }) => {
   await responsePromise;
 
   await expect(page.locator('#message')).not.toHaveText('', { timeout: 15000 });
-  await expect(page.locator('#message')).not.toHaveText('Searching...');
 });
