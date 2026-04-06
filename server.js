@@ -14,6 +14,11 @@ const PORT = process.env.PORT || 3000;
 // By using express.static middleware, we can serve the frontend files directly without needing to set up additional routes for each file
 app.use(express.static(path.join(__dirname, 'public')));
 
+// We can adjust this 
+const RADIUS = 8047;
+const RESULT_LIMIT = 20;
+const CATEGORIES = 'restaurants';
+
 app.get('/api/restaurants', async (req, res) => {
   const { city } = req.query;
 
@@ -23,7 +28,7 @@ app.get('/api/restaurants', async (req, res) => {
 
   try {
     const response = await fetch(
-      `https://api.yelp.com/v3/businesses/search?location=${encodeURIComponent(city)}&radius=8047&limit=20&categories=restaurants`,
+      `https://api.yelp.com/v3/businesses/search?location=${encodeURIComponent(city)}&radius=${RADIUS}&limit=${RESULT_LIMIT}&categories=${CATEGORIES}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.YELP_API_KEY}`,
