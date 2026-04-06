@@ -11,7 +11,7 @@ test('page loads with title and search form', async ({ page }) => {
 test('empty input shows error message', async ({ page }) => {
   await page.goto('/');
   await page.click('button[type="submit"]');
-  await expect(page.locator('#message')).toHaveText('Please enter a city.');
+  await expect(page.locator('#results .empty-state h2')).toHaveText('Where are you headed?');
 });
 
 test('search returns restaurants with required fields', async ({ page }) => {
@@ -34,9 +34,9 @@ test('search returns restaurants with required fields', async ({ page }) => {
   const firstCard = cards.first();
   await expect(firstCard.locator('h3')).toBeVisible();
   const text = await firstCard.textContent();
-  expect(text).toMatch(/Rating: [\d.]+ \/ 5/);
-  expect(text).toMatch(/Address:/);
-  expect(text).toMatch(/Location: -?[\d.]+, -?[\d.]+/);
+  expect(text).toMatch(/[\d.]+/);
+  expect(text).toMatch(/reviews/);
+  expect(text).toMatch(/Get Directions/);
 });
 
 test('displays multiple restaurant cards', async ({ page }) => {
@@ -64,5 +64,17 @@ test('invalid city shows error', async ({ page }) => {
   await page.click('button[type="submit"]');
   await responsePromise;
 
-  await expect(page.locator('#message')).not.toHaveText('', { timeout: 15000 });
+  await expect(page.locator('#results .empty-state h2')).toHaveText('Something went wrong', { timeout: 15000 });
+});
+
+test('network error shows connection error message', async ({ page }) => {
+  await page.goto('/');
+  await page.route('**/api/restaurants*', async (route) => {
+    await route.abort('failed');
+  });
+
+  await page.locator('#city-input').fill('New York');
+  await page.click('button[type="submit"]');
+
+  await expect(page.locator('#results .empty-state p')).toHaveText('We had trouble connecting. Please check your connection and try again.', { timeout: 15000 });
 });

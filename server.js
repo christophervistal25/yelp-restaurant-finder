@@ -50,9 +50,13 @@ app.get('/api/restaurants', async (req, res) => {
     const restaurants = data.businesses.map((biz) => ({
       name: biz.name,
       rating: biz.rating,
+      review_count: biz.review_count,
       address: biz.location.display_address.join(', '),
       latitude: biz.coordinates.latitude,
       longitude: biz.coordinates.longitude,
+      image_url: biz.image_url,
+      alias: biz.alias,
+      url : biz.url,
     }));
 
     res.json({ restaurants });
