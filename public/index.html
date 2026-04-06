@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yelp Restaurant Finder</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    h1 { text-align: center; }
+
+    #search-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 2rem;
+      justify-content: center;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 250px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #d32323;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover { background-color: #b11f1f; }
+
+    #results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .card:hover { transform: translateY(-5px); }
+
+    .card h3 { margin: 0 0 10px 0; color: #d32323; }
+
+    .card p { margin: 5px 0; font-size: 0.9rem; color: #666; }
+
+    .rating { font-weight: bold; color: #f2b01e; }
+
+    .spinner {
+      display: none;
+      width: 40px;
+      height: 40px;
+      margin: 20px auto;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #d32323;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading .spinner { display: block; }
+  </style>
+</head>
+<body>
+
+  <h1>Restaurant Finder</h1>
+
+  <form id="search-form">
+    <input type="text" id="city-input" placeholder="Enter a city (e.g. New York)" />
+    <button type="submit">Search</button>
+  </form>
+
+  <div id="loader-container">
+    <div id="spinner" class="spinner"></div>
+  </div>
+
+  <p id="message" style="text-align: center;"></p>
+
+  <div id="results"></div>
+
+  <script>
+    const form = document.getElementById('search-form');
+    const input = document.getElementById('city-input');
+    const message = document.getElementById('message');
+    const results = document.getElementById('results');
+    const spinner = document.getElementById('spinner');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const city = input.value.trim();
+      if (!city) {
+        message.textContent = 'Please enter a city.';
+        results.innerHTML = '';
+        return;
+      }
+
+      message.textContent = '';
+      results.innerHTML = '';
+      spinner.style.display = 'block';
+
+      try {
+        const response = await fetch(`/api/restaurants?city=${encodeURIComponent(city)}`);
+        const data = await response.json();
+        spinner.style.display = 'none';
+
+        if (data.error) {
+          message.textContent = data.error;
+          return;
+        }
+
+        if (data.restaurants.length === 0) {
+          message.textContent = 'No restaurants found.';
+          return;
+        }
+
+        data.restaurants.forEach((r) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h3>${r.name}</h3>
+            <p class="rating">Rating: ${r.rating} / 5</p>
+            <p><strong>Address:</strong> ${r.address}</p>
+            <p><small>Location: ${r.latitude}, ${r.longitude}</small></p>
+          `;
+          results.appendChild(card);
+        });
+      } catch (err) {
+        spinner.style.display = 'none';
+        message.textContent = 'Something went wrong. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>
